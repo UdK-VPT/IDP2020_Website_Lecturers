@@ -1,0 +1,8 @@
+[submodule "submodules"]
+	path = submodules
+	url = https://github.com/sriram23/Weather-Now.git
+	branch = master
+[submodule "Weather-Now"]
+	path = Weather-Now
+	url = https://github.com/sriram23/Weather-Now.git
+	branch = master
