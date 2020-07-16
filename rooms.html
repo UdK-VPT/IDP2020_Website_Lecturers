@@ -61,6 +61,15 @@
                   </div>
 
                   <p>bla, bla</p>
+
+                  <input type="range" class="slider" min="15" max="25" value="20.0" step="0.1" id="myRange">
+                  <p>Ideal room air temperature [°C]: <span id="demo"></span></p>
+
+                  <div id="dateAndTime">date and time</div>
+                  <div id="sensTempValue">sensTempValue</div>
+                  <div id="diffTempValue">diffTempValue</div>
+
+                  <iframe src="https://shiftr.io/nytschgeusen/DHT11-test/embed?zoom=1" width="600" height="400" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
             </div>
 
             <div class="jumbotron">
@@ -93,5 +102,44 @@
         <script src="js/bootstrap.min.js"></script>
         <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
         <script src="js/ie10-viewport-bug-workaround.js"></script>
+        <!-- <script src="https://code.jquery.com/jquery-2.2.3.min.js"></script> -->
+        <script src="https://assets.shiftr.io/js/mqtt-2.9.0.js"></script>
+        <script src="js/script.js" charset="utf-8"></script>
+        <script>
+        var slider = document.getElementById("myRange");
+        var output = document.getElementById("demo");
+        output.innerHTML = slider.value;
+        slider.oninput = function() {
+          output.innerHTML = this.value;
+        }
+        </script>
+        <script>
+        var counter = 1;
+        var diffTemp;
+
+        var client = mqtt.connect('mqtt://f53c6659:8b0660b57f7181d4@broker.shiftr.io/', {
+            clientId: 'javascript'});
+
+        client.on('connect', function(){
+          console.log('client has connected!');
+          client.subscribe('/environment-data/temperature');
+          console.log('topic has subscribed');
+        });
+
+        client.on('message', function(topic, message) {
+          console.log('new message:', topic, message.toString());
+          console.log('new sensor values');
+        });
+        function get_values(){
+          var datetime= new Date().toLocaleString();
+          document.getElementById("dateAndTime").innerHTML = datetime;
+          client.on('message', function(topic, message) {
+            diffTemp = slider.value - message;
+            document.getElementById("sensTempValue").innerHTML= "Measured air temperature: " + message.toString()+" °C";
+            document.getElementById("diffTempValue").innerHTML= "Difference to ideal air temperature: " + diffTemp.toString()+" °C";
+          });
+        }
+        setInterval(get_values, 1000);
+        </script>
     </body>
 </html>
